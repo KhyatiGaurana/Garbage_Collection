@@ -115,14 +115,17 @@
             }
             var locations = this.getLocations();
             this.drawMarkers(locations.arr);
+
             if (locations.count < 2) {
                 return;
             }
             loadingHint.setMessage('Loading...');
             tt.services.calculateRoute({
                 key: "FAAwKDQaRToEV2bExLtJHxq1d8hGezRe",
-                traffic: false,
+                // traffic: true,
                 locations: locations.str
+                // routeType: 'shortest',
+                // computeBestOrder: true
             })
                 .then(function(response) {
                     loadingHint.hide();
@@ -378,9 +381,12 @@
             var routingInput = this.createRoutingInput(index);
             this.container.insertBefore(routingInput.container, routingInputs[length - 1].container);
             routingInputs.splice(index, 0, routingInput);
+            
             this.updateRoutingInputIndexes();
             this.updateRoutingInputIcons();
         };
+
+        
 
         Panel.prototype.createRoutingInput = function(index) {
             return new RoutingInput({
@@ -433,6 +439,7 @@
         });
 
         new Panel(routingService);
+        
     </script>
 </body>
 </html>

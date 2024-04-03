@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.13.0/maps/maps.css'>
+  <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.13.0/maps/maps-web.min.js"></script>
+  <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.13.0/services/services-web.min.js"></script>
+  <style>
+    #map {
+      min-height: 720px;
+      min-width: 10px;
+      outline: none;
+      overflow: hidden;
+      padding: 9px 20px 8px;
+      position: relative;
+    }
+.result{
+    background-color: #fff;
+  border-radius: 4px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #222;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Farfetch Basis","Helvetica Neue",Arial,sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+  max-width: none;
+  min-height: 44px;
+  min-width: 10px;
+  outline: none;
+  overflow: hidden;
+  padding: 9px 20px 8px;
+  position: relative;
+  text-align: center;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 100%;
+}
+
+.button:hover,
+.button:focus {
+  opacity: .75;
+}
+.button {
+  background-color: #222;
+  border-radius: 4px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Farfetch Basis","Helvetica Neue",Arial,sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+  max-width: none;
+  min-height: 44px;
+  min-width: 10px;
+  outline: none;
+  overflow: hidden;
+  padding: 9px 20px 8px;
+  position: relative;
+  text-align: center;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 100%;
+}
+
+.button:hover,
+.button:focus {
+  opacity: .75;
+}
+  </style>
+</head>
+
+<body>
+
+  <button class="button" onclick="route()">Route</button> <div class="result" id='summary-route'></div>
+  <button class="button" onclick="optimize()">Optimize</button><div class="result" id='summary-optimize'></div>
+  <div id='map'></div>
+  
+
+  <script>
+    var waypoints = []
+    var map
+
+    function optimize() {
+      tt.services.calculateRoute({
+        key: "FAAwKDQaRToEV2bExLtJHxq1d8hGezRe", // Get one for free at developer.tomtom.com
+        locations: waypoints,
+        routeType: 'fastest',
+        computeBestOrder: true
+      })
+        .then((result) => {
+          console.log(result)
+          const summary = document.getElementById('summary-optimize')
+          const travelTime=result.routes[0].summary.travelTimeInSeconds
+          summary.innerHTML = 'Best route ' + Math.floor(travelTime/60)+" min" + travelTime%60+ " s"
+
+          const geojson = result.toGeoJson()
+          if (map.getLayer('optimized')) {
+            map.removeLayer('optimized')
+            map.removeSource('optimized')
+          }
+          map.addLayer({
+            'id': 'optimized',
+            'type': 'line',
+            'source': {
+              'type': 'geojson',
+              'data': geojson
+            },
+            'paint': {
+              'line-color': 'green',
+              'line-width': 8
+            }
+          });
+        })
+    }
+
+    function route() {
+      tt.services.calculateRoute({
+        key: "FAAwKDQaRToEV2bExLtJHxq1d8hGezRe", // Get on for free at developer.tomtom.com
+        routeType: 'shortest',
+        locations: waypoints
+      })
+        .then((result) => {
+          console.log(result)
+          const summary = document.getElementById('summary-route')
+          const travelTime=result.routes[0].summary.travelTimeInSeconds
+          summary.innerHTML = 'Normal route ' + Math.floor(travelTime/60)+" min" + travelTime%60+ " s"
+          const geojson = result.toGeoJson()
+          if (map.getLayer('route')) {
+            map.removeLayer('route')
+            map.removeSource('route')
+          }
+
+          map.addLayer({
+            'id': 'route',
+            'type': 'line',
+            'source': {
+              'type': 'geojson',
+              'data': geojson
+            },
+            'paint': {
+              'line-color': 'orange',
+              'line-width': 8
+            }
+          });
+        })
+    }
+
+
+    tt.setProductInfo('<your-product-id>', '<your-product-version>')
+
+    tt.services.fuzzySearch({
+      key: "FAAwKDQaRToEV2bExLtJHxq1d8hGezRe",  // Get on for free at developer.tomtom.com
+      query: 'Sewak Park, Dwarka mor'
+    }).then(function (response) {
+      showMap(response.results[0].position)
+    });
+
+
+
+    function showMap(center) {
+      map = tt.map({
+        key: "FAAwKDQaRToEV2bExLtJHxq1d8hGezRe",  // Get on for free at developer.tomtom.com
+        container: 'map',
+        center: center,
+        zoom: 13,
+        pitch: 25
+      });
+
+      map.on('click', function (event) {
+        const coord = event.lngLat
+        waypoints.push(coord)
+        new tt.Marker().setLngLat(coord).addTo(map)
+      })
+    }
+
+  </script>
+</body>
+
+</html>
