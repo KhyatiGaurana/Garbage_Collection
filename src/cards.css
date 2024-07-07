@@ -1,0 +1,15 @@
+.body{
+    background-color: light;
+    display: flex;
+    flex-flow: row wrap;
+    align-content: space-between;
+    justify-content: space-between;
+    /* padding: 0px 1rem 2rem 1rem; */
+}
+.card{
+    background-color: light;
+
+}
+.light-text{
+    color: azure !important;
+}
